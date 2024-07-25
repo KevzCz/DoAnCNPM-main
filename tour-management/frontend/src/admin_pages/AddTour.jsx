@@ -12,7 +12,7 @@ const AddTour = () => {
   const [price, setPrice] = useState('');
   const [maxSeats, setMaxSeats] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState('Không hoạt động');
 
   const navigate = useNavigate();
 
@@ -54,6 +54,7 @@ const AddTour = () => {
           <option value="Không hoạt động">Không hoạt động</option>
           <option value="Hoạt động">Hoạt động</option>
           <option value="Đã kết thúc">Đã kết thúc</option>
+          <option value="Hết chỗ">Hết chỗ</option>
         </select>
         <button type="submit" className="create-tour-button">Create Tour</button>
       </form>

@@ -13,6 +13,8 @@ import AddCategory from '../admin_pages/AddCategory';
 import AddSchedule from '../admin_pages/AddSchedule';
 import AdminPage from "../admin_pages/AdminPage";
 import AddLocation from "../admin_pages/AddLocation";
+import BookingDetails from "../pages/BookingDetails";
+import Payment from "../pages/Payment";
 
 const Routers = () => {
   return (
@@ -31,6 +33,8 @@ const Routers = () => {
         <Route path="/add-category" element={<AddCategory />} />
         <Route path="/add-schedule" element={<AddSchedule />} />
         <Route path="/add-location" element={<AddLocation />} />
+        <Route path="/booking-details" element={<BookingDetails />} />
+        <Route path="/payment/:bookingId" element={<Payment />} />
     </Routes>
   );
 };

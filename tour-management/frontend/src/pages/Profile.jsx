@@ -16,17 +16,21 @@ const Profile = () => {
         const storedUser = JSON.parse(localStorage.getItem('user'));
         const token = localStorage.getItem('token');
 
-        if (storedUser && storedUser.phone_number && token) {
+        if (storedUser && token) {
             const fetchUserProfile = async () => {
                 try {
-                    const response = await fetch(`/user/profile?phone_number=${storedUser.phone_number}`);
+                    const response = await fetch(`/user/profile`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
                     if (response.ok) {
                         const userData = await response.json();
                         setUser(userData);
                         setProfileData({
                             name: userData.name || '',
                             gender: userData.gender || '',
-                            birth_date: userData.birth_date ? new Date(userData.birth_date).toLocaleDateString() : '',
+                            birth_date: userData.birth_date ? new Date(userData.birth_date).toISOString().split('T')[0] : '',
                             role: userData.role || '',
                             phone_number: userData.phone_number || ''
                         });
@@ -53,14 +57,15 @@ const Profile = () => {
     };
 
     const handleSave = async () => {
+        const token = localStorage.getItem('token');
         try {
             const response = await fetch('/user/update', {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    phone_number: profileData.phone_number,
                     name: profileData.name,
                     gender: profileData.gender,
                     birth_date: profileData.birth_date

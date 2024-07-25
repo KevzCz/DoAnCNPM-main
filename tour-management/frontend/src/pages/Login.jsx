@@ -31,7 +31,7 @@ const Login = () => {
             }
         } catch (err) {
             setErrorMessages('Incorrect phone number or password.');
-            console.error('Login error:', err.response.data);  // Log the error response
+            console.error('Login error:', err.response?.data);  // Log the error response
         }
     };
 

@@ -1,0 +1,108 @@
+import React, { useState, useEffect, useContext } from "react";
+import { Container, Row, Col, Form, FormGroup, Button } from "reactstrap";
+import { useNavigate, useParams } from "react-router-dom";
+import AuthContext from "../context/AuthContext";
+import "../styles/payment.css";
+
+const Payment = () => {
+  const { bookingId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const [paymentMethod, setPaymentMethod] = useState("Momo");
+  const [amount, setAmount] = useState(0);
+  const [booking, setBooking] = useState(null);
+
+  useEffect(() => {
+    const fetchBookingDetails = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Token is missing. Please log in again.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/bookings/${bookingId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const booking = await response.json();
+          setBooking(booking);
+          const calculatedAmount = booking.price * booking.seats + 10;
+          setAmount(calculatedAmount);
+        } else {
+          alert("Error fetching booking details");
+        }
+      } catch (error) {
+        console.error('Error fetching booking details:', error);
+      }
+    };
+
+    fetchBookingDetails();
+  }, [bookingId]);
+
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Token is missing. Please log in again.");
+      return;
+    }
+
+    const paymentData = {
+      booking_id: bookingId,
+      payment_method: paymentMethod
+    };
+
+    try {
+      const response = await fetch('http://localhost:3000/payments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(paymentData)
+      });
+
+      if (response.ok) {
+        navigate("/thank-you");
+      } else {
+        alert("Payment failed. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error processing payment:', error);
+    }
+  };
+
+  return (
+    <Container>
+      <Row>
+        <Col lg="6" className="m-auto">
+          <div className="payment">
+            <h2 className="text-center">Payment Details</h2>
+            <Form onSubmit={handlePayment}>
+              <FormGroup>
+                <label htmlFor="amount">Amount</label>
+                <input type="number" id="amount" value={amount} readOnly className="form-control" />
+              </FormGroup>
+              <FormGroup>
+                <label htmlFor="paymentMethod">Payment Method</label>
+                <select id="paymentMethod" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="form-control">
+                  <option value="Momo">Momo</option>
+                  <option value="VNPay">VNPay</option>
+                </select>
+              </FormGroup>
+              <Button className="btn primary__btn w-100 mt-4" type="submit">
+                Pay Now
+              </Button>
+            </Form>
+          </div>
+        </Col>
+      </Row>
+    </Container>
+  );
+};
+
+export default Payment;
