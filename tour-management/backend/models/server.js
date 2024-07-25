@@ -449,7 +449,7 @@ app.post('/payments', authenticateJWT, (req, res) => {
 
       db.query(
         'INSERT INTO payments (payment_id, booking_id, amount, payment_date, status, payment_method) VALUES (?, ?, ?, ?, ?, ?)', 
-        [paymentId, booking_id, amount, payment_date, 'Chờ thanh toán', payment_method], 
+        [paymentId, booking_id, amount, payment_date, 'Đã thanh toán', payment_method], 
         (err, result) => {
           if (err) {
             console.error('Error processing payment:', err);
@@ -484,7 +484,61 @@ app.get('/bookings/:bookingId', authenticateJWT, (req, res) => {
     }
   );
 });
- 
+// Cancel payment and delete booking endpoint
+app.post('/payments/cancel/:bookingId', authenticateJWT, (req, res) => {
+  const { bookingId } = req.params;
+
+  // Start a transaction
+  db.beginTransaction((err) => {
+    if (err) {
+      console.error('Error starting transaction:', err);
+      return res.status(500).send('Server error: Error starting transaction');
+    }
+
+    // Update payment status
+    db.query('UPDATE payments SET status = ? WHERE booking_id = ?', ['Hủy', bookingId], (err, result) => {
+      if (err) {
+        return db.rollback(() => {
+          console.error('Error updating payment status:', err);
+          res.status(500).send('Server error: Error updating payment status');
+        });
+      }
+
+      // Delete booking details
+      db.query('DELETE FROM booking_detail WHERE booking_id = ?', [bookingId], (err, result) => {
+        if (err) {
+          return db.rollback(() => {
+            console.error('Error deleting booking details:', err);
+            res.status(500).send('Server error: Error deleting booking details');
+          });
+        }
+
+        // Delete booking
+        db.query('DELETE FROM bookings WHERE booking_id = ?', [bookingId], (err, result) => {
+          if (err) {
+            return db.rollback(() => {
+              console.error('Error deleting booking:', err);
+              res.status(500).send('Server error: Error deleting booking');
+            });
+          }
+
+          // Commit transaction
+          db.commit((err) => {
+            if (err) {
+              return db.rollback(() => {
+                console.error('Error committing transaction:', err);
+                res.status(500).send('Server error: Error committing transaction');
+              });
+            }
+
+            res.status(200).send('Payment canceled and booking deleted');
+          });
+        });
+      });
+    });
+  });
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
