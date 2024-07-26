@@ -64,18 +64,6 @@ const Tour = () => {
     );
   };
 
-  const FeaturedTourList = () => {
-    return (
-      <>
-        {tours?.filter(tour => tour.max_seats > 0).map((tour) => (
-          <Col lg="3" className="mb-4" key={tour.tour_id}>
-            <TourCard tour={tour} />
-          </Col>
-        ))}
-      </>
-    );
-  };
-
   return (
     <>
       <CommonSection title={"All Tours"} />
@@ -107,14 +95,6 @@ const Tour = () => {
                 ))}
               </div>
             </Col>
-          </Row>
-        </Container>
-      </section>
-      <section className="pt-0">
-        <Container>
-          <Row>
-            <h2>Featured Tours</h2>
-            <FeaturedTourList />
           </Row>
         </Container>
       </section>

@@ -173,3 +173,16 @@
 .review__item span {
   font-weight: 500;
 }
+.tour__reviews .rating__group span {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  color: var(--secondary-color);
+  cursor: pointer;
+}
+.tour__reviews .rating__group span.filled i {
+  color: var(--secondary-color);
+}
+.tour__reviews .rating__group span i {
+  color: var(--text-color);
+}

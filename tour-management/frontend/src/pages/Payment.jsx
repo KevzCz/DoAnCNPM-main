@@ -11,7 +11,7 @@ const Payment = () => {
   const [paymentMethod, setPaymentMethod] = useState("Momo");
   const [amount, setAmount] = useState(0);
   const [booking, setBooking] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(60); // 10 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -63,12 +63,18 @@ const Payment = () => {
       return;
     }
 
+    const cancelData = {
+      booking_id: bookingId,
+    };
+
     try {
-      const response = await fetch(`http://localhost:3000/payments/cancel/${bookingId}`, {
-        method: 'POST',
+      const response = await fetch('http://localhost:3000/payments/cancel', {
+        method: 'PUT',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify(cancelData)
       });
 
       if (response.ok) {
@@ -95,8 +101,8 @@ const Payment = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:3000/payments', {
-        method: 'POST',
+      const response = await fetch('http://localhost:3000/payments/update', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -134,6 +140,9 @@ const Payment = () => {
               </FormGroup>
               <Button className="btn primary__btn w-100 mt-4" type="submit">
                 Pay Now
+              </Button>
+              <Button className="btn secondary__btn w-100 mt-4" onClick={handleCancelPayment}>
+                Cancel Payment
               </Button>
               <div className="timer mt-3 text-center">
                 <p>Time left: {Math.floor(timeLeft / 60)}:{timeLeft % 60 < 10 ? '0' : ''}{timeLeft % 60} minutes</p>

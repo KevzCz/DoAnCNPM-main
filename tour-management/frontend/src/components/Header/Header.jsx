@@ -1,7 +1,6 @@
-import React, { useRef, useEffect, useContext } from "react";
+import React, { useRef, useEffect, useContext, useState } from "react";
 import { Container, Row, Button } from "reactstrap";
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import axios from 'axios';
 import AuthContext from '../../context/AuthContext';
 import logo from "../../assets/images/logo.png";
 import avt from "../../assets/images/ava-1.jpg";
@@ -18,14 +17,14 @@ const nav__links = [
   },
 ];
 
-const adminLinks = [
+const NVQLCTLinks = [
+  {
+    path: "/admin",
+    display: "Admin Panel",
+  },
   {
     path: "/add-tour",
     display: "Add Tour",
-  },
-  {
-    path: "/add-category",
-    display: "Add Category",
   },
   {
     path: "/add-schedule",
@@ -37,26 +36,25 @@ const adminLinks = [
   },
 ];
 
+const AdminLinks = [
+  {
+    path: "/add-category",
+    display: "Add Category",
+  },
+];
+
 const Header = () => {
   const headerRef = useRef(null);
-  const { user, setUser, logout } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const storedUser = JSON.parse(localStorage.getItem('user'));
-      if (storedUser && storedUser.phone_number) {
-        try {
-          const res = await axios.get(`/user/profile?phone_number=${storedUser.phone_number}`);
-          setUser(res.data);
-        } catch (err) {
-          console.error('Error fetching user data:', err);
-        }
-      }
-    };
-
-    fetchUserData();
-  }, [setUser]);
+  const [profileData, setProfileData] = useState({
+    name: '',
+    gender: '',
+    birth_date: '',
+    role: '',
+    phone_number: ''
+  });
 
   const handleLogout = () => {
     logout();
@@ -76,10 +74,54 @@ const Header = () => {
     });
   };
 
+  const fetchUserProfile = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const response = await fetch(`/user/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const textResponse = await response.text();
+
+      if (response.ok) {
+        const userData = JSON.parse(textResponse);
+        setUser(userData);
+        setProfileData({
+          name: userData.name || '',
+          gender: userData.gender || '',
+          birth_date: userData.birth_date ? addOneDay(userData.birth_date) : '',
+          role: userData.role || '',
+          phone_number: userData.phone_number || ''
+        });
+      } else {
+        console.error('Failed to fetch user profile:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
+    if (storedUser && token) {
+      fetchUserProfile();
+    }
+  });
+
   useEffect(() => {
     stickyHeaderFunc();
     return () => window.removeEventListener("scroll", stickyHeaderFunc);
   }, []);
+
+  const addOneDay = (dateString) => {
+    const date = new Date(dateString);
+    date.setDate(date.getDate() + 1);
+    return date.toISOString().split('T')[0];
+  };
 
   return (
     <header className="header" ref={headerRef}>
@@ -112,7 +154,16 @@ const Header = () => {
                     <Link to="/tours" className="dropdown-item">All Tours</Link>
                     {user && user.role === 'NVQL_CT' && (
                       <>
-                        {adminLinks.map((item, index) => (
+                        {NVQLCTLinks.map((item, index) => (
+                          <Link to={item.path} className="dropdown-item" key={index}>
+                            {item.display}
+                          </Link>
+                        ))}
+                      </>
+                    )}
+                    {user && user.role === 'NVQL_HT' && (
+                      <>
+                        {AdminLinks.map((item, index) => (
                           <Link to={item.path} className="dropdown-item" key={index}>
                             {item.display}
                           </Link>
@@ -129,9 +180,10 @@ const Header = () => {
                 {user ? (
                   <div className="dropdown-header">
                     <img src={user.photo ? user.photo : avt} alt="Avatar" className="avatar" />
-                    <span className="username">{user.name}</span>
+                    <span className="username">{profileData.name}</span>
                     <div className="dropdown-menu">
                       <Link to="/profile" className="dropdown-item">Thông tin tài khoản</Link>
+                      <Link to="/invoices" className="dropdown-item">Lịch sử đặt tour</Link>
                       <span className="dropdown-item" onClick={handleLogout}>Đăng xuất</span>
                     </div>
                   </div>

@@ -87,19 +87,19 @@ const Booking = ({ tour, avgRating }) => {
       alert("Token is missing. Please log in again.");
       return;
     }
-
+  
     if (!credentials.bookAt) {
       alert("Booking date cannot be null.");
       return;
     }
-
+    
     const bookingData = {
       tour_id: tour.tour_id,
       bookAt: credentials.bookAt,
       guestSize: credentials.guestSize,
       passengers: credentials.passengers,
     };
-
+  
     fetch('http://localhost:3000/book', {
       method: 'POST',
       headers: {
@@ -111,14 +111,36 @@ const Booking = ({ tour, avgRating }) => {
     .then(response => response.json())
     .then(data => {
       if (data.booking_id) {
-        // Redirect to payment page with booking ID
-        navigate(`/payment/${data.booking_id}`);
+        // Insert payment after successful booking
+        const paymentData = {
+          booking_id: data.booking_id,
+          payment_method: "Momo", // You can change this to whatever method you want
+        };
+  
+        fetch('http://localhost:3000/payments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(paymentData)
+        })
+        .then(response => response.json())
+        .then(paymentResponse => {
+          if (paymentResponse.status === 'Chờ thanh toán') {
+            navigate(`/payment/${data.booking_id}`);
+          } else {
+            alert("Payment failed. Please try again.");
+          }
+        })
+        .catch(error => console.error('Error:', error));
       } else {
         alert("Booking failed. Please try again.");
       }
     })
     .catch(error => console.error('Error:', error));
-};
+  };
+  
 
   return (
     <div className="booking">
@@ -203,7 +225,7 @@ const TourDetails = () => {
     role: '',
     phone_number: ''
   });
-
+  const defaultImage = "https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg";
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -221,18 +243,16 @@ const TourDetails = () => {
       .then(response => response.json())
       .then(data => {
         setUser(data);
-        setProfileData({
-          name: data.name || '',
-          gender: data.gender || '',
-          birth_date: data.birth_date ? new Date(data.birth_date).toISOString().split('T')[0] : '',
-          role: data.role || '',
-          phone_number: data.phone_number || ''
-        });
       });
   }, [id]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to submit a review.");
+      return;
+    }
     const review = {
       user_id: user.user_id,
       tour_id: id,
@@ -240,23 +260,50 @@ const TourDetails = () => {
       review_date: new Date().toISOString().split('T')[0]
     };
 
-    await fetch(`http://localhost:3000/reviews`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(review)
-    });
+    try {
+      const response = await fetch(`http://localhost:3000/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(review)
+      });
 
-    const updatedTour = await fetch(`http://localhost:3000/tours/${id}`).then(response => response.json());
-    setTour(updatedTour);
-    setTourRating(null);
-    setButtonText("Submitted");
+      if (response.ok) {
+        const newReview = await response.json();
+        updateTourWithNewReview(newReview);
+        setTourRating(null);
+        setButtonText("Submitted");
+      } else {
+        throw new Error('Failed to submit review');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   const handleRatingClick = (rating) => {
     setTourRating(rating);
     setButtonText("Submit");
+  };
+
+  const updateTourWithNewReview = (newReview) => {
+    setTour((prevTour) => {
+      const updatedReviews = [...prevTour.reviews, newReview];
+      const { totalRating, avgRating } = calculateAvgRating(updatedReviews);
+      return {
+        ...prevTour,
+        reviews: updatedReviews,
+        avgRating
+      };
+    });
+  };
+
+  const calculateAvgRating = (reviews) => {
+    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+    const avgRating = totalRating / reviews.length;
+    return { totalRating, avgRating };
   };
 
   if (!tour) return <div>Loading...</div>;
@@ -274,13 +321,7 @@ const TourDetails = () => {
     seats_remaining,
   } = tour;
 
-  const calculalteAvgRating = (reviews) => {
-    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-    const avgRating = totalRating / reviews.length;
-    return { totalRating, avgRating };
-  };
-
-  const { totalRating, avgRating } = calculalteAvgRating(reviews);
+  const { totalRating, avgRating } = calculateAvgRating(reviews);
 
   const options = { day: "numeric", month: "long", year: "numeric" };
 
@@ -291,14 +332,14 @@ const TourDetails = () => {
           <Row>
             <Col lg="8">
               <div className="tour__content">
-                <img src={image_url} alt="" />
+                <img src={defaultImage} alt="" />
                 <div className="tour__info">
                   <h2>{name}</h2>
                   <div className="d-flex align-items-center gap-5">
                     <span className="tour__rating d-flex align-items-center gap-1">
                       <i className="ri-star-fill" style={{ color: "var(--secondary-color)" }}></i>
                       {avgRating === 0 ? null : avgRating}
-                      {totalRating === 0 ? "Not rated" : <span>({reviews?.length})</span>}
+                      {totalRating === 0 ? "Not rated" : <span>({reviews.length})</span>}
                     </span>
                     <span>
                       <i className="ri-map-pin-user-fill"></i> {address}
@@ -322,35 +363,21 @@ const TourDetails = () => {
                   <p>{description}</p>
                 </div>
                 <div className="tour__reviews mt-4">
-                  <h4>Reviews({reviews?.length} reviews)</h4>
+                  <h4>Reviews({reviews.length} reviews)</h4>
                   <Form onSubmit={submitHandler}>
                     <div className="d-flex align-items-center gap-3 mb-4 rating__group">
                       {[...Array(6)].map((_, index) => (
-                        <span key={index} onClick={() => handleRatingClick(index)}>
+                        <span 
+                          key={index} 
+                          onClick={() => handleRatingClick(index)} 
+                          className={index <= tourRating ? "filled" : ""}
+                        >
                           {index} <i className="ri-star-fill"></i>
                         </span>
                       ))}
                     </div>
                     <Button type="submit" className="btn primary__btn text-white">{buttonText}</Button>
                   </Form>
-                  <ListGroup className="user__reviews">
-                    {reviews?.map((review) => (
-                      <div className="review__item" key={review.review_id}>
-                        <img src={avatar} alt="" />
-                        <div className="w-100">
-                          <div className="d-flex align-items-center justify-content-between">
-                            <div>
-                              <h5>{review.user_id}</h5>
-                              <p>{new Date(review.review_date).toLocaleDateString("en-US", options)}</p>
-                            </div>
-                            <span className="d-flex align-items-center">
-                              {review.rating} <i className="ri-star-fill"></i>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </ListGroup>
                 </div>
               </div>
             </Col>

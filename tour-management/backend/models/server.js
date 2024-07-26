@@ -99,7 +99,7 @@ app.post('/login', (req, res) => {
         return res.status(400).send('Invalid password');
       }
 
-      const token = jwt.sign({ userId: user.user_id, role: user.role }, 'your_jwt_secret');
+      const token = jwt.sign({ userId: user.user_id, role: user.role, userName: user.userName }, 'your_jwt_secret');
       res.status(200).json({ token, user });
     } catch (err) {
       res.status(500).send('Server error during login');
@@ -308,6 +308,7 @@ app.post('/tour-locations', (req, res) => {
 });
 
 // Create or update review endpoint
+// Create or update review endpoint
 app.post('/reviews', authenticateJWT, (req, res) => {
   const { tour_id, rating } = req.body;
   const userId = req.user.userId;
@@ -324,6 +325,7 @@ app.post('/reviews', authenticateJWT, (req, res) => {
     res.status(201).send('Review created or updated');
   });
 });
+
 
 // Booking endpoint
 app.post('/book', authenticateJWT, (req, res) => {
@@ -428,7 +430,6 @@ app.post('/payments', authenticateJWT, (req, res) => {
   const payment_date = new Date().toISOString().split('T')[0];
   const paymentId = `PM${Math.random().toString().slice(2, 5)}`;
 
-  // Fetch tour price and seats from the booking
   db.query(
     `SELECT t.price, b.seats 
      FROM bookings b
@@ -438,10 +439,10 @@ app.post('/payments', authenticateJWT, (req, res) => {
     (err, results) => {
       if (err) {
         console.error('Error fetching booking details:', err);
-        return res.status(500).send('Error fetching booking details');
+        return res.status(500).json({ error: 'Error fetching booking details' });
       }
       if (results.length === 0) {
-        return res.status(404).send('Booking not found');
+        return res.status(404).json({ error: 'Booking not found' });
       }
 
       const { price, seats } = results[0];
@@ -449,13 +450,13 @@ app.post('/payments', authenticateJWT, (req, res) => {
 
       db.query(
         'INSERT INTO payments (payment_id, booking_id, amount, payment_date, status, payment_method) VALUES (?, ?, ?, ?, ?, ?)', 
-        [paymentId, booking_id, amount, payment_date, 'Đã thanh toán', payment_method], 
+        [paymentId, booking_id, amount, payment_date, 'Chờ thanh toán', payment_method], 
         (err, result) => {
           if (err) {
             console.error('Error processing payment:', err);
-            return res.status(500).send('Error processing payment');
+            return res.status(500).json({ error: 'Error processing payment' });
           }
-          res.status(201).send('Payment initiated');
+          res.status(201).json({ status: 'Chờ thanh toán', message: 'Payment initiated' });
         }
       );
     }
@@ -484,61 +485,121 @@ app.get('/bookings/:bookingId', authenticateJWT, (req, res) => {
     }
   );
 });
-// Cancel payment and delete booking endpoint
-app.post('/payments/cancel/:bookingId', authenticateJWT, (req, res) => {
-  const { bookingId } = req.params;
+app.put('/payments/update', authenticateJWT, (req, res) => {
+  const { booking_id, payment_method } = req.body;
+  const payment_date = new Date().toISOString().split('T')[0];
 
-  // Start a transaction
-  db.beginTransaction((err) => {
-    if (err) {
-      console.error('Error starting transaction:', err);
-      return res.status(500).send('Server error: Error starting transaction');
-    }
-
-    // Update payment status
-    db.query('UPDATE payments SET status = ? WHERE booking_id = ?', ['Hủy', bookingId], (err, result) => {
+  db.query(
+    `SELECT t.price, b.seats 
+     FROM bookings b
+     JOIN tours t ON b.tour_id = t.tour_id
+     WHERE b.booking_id = ?`, 
+    [booking_id],
+    (err, results) => {
       if (err) {
-        return db.rollback(() => {
-          console.error('Error updating payment status:', err);
-          res.status(500).send('Server error: Error updating payment status');
-        });
+        console.error('Error fetching booking details:', err);
+        return res.status(500).json({ error: 'Error fetching booking details' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'Booking not found' });
       }
 
-      // Delete booking details
-      db.query('DELETE FROM booking_detail WHERE booking_id = ?', [bookingId], (err, result) => {
-        if (err) {
-          return db.rollback(() => {
-            console.error('Error deleting booking details:', err);
-            res.status(500).send('Server error: Error deleting booking details');
-          });
-        }
+      const { price, seats } = results[0];
+      const amount = price * seats + 10;
 
-        // Delete booking
-        db.query('DELETE FROM bookings WHERE booking_id = ?', [bookingId], (err, result) => {
+      db.query(
+        'SELECT payment_id FROM payments WHERE booking_id = ?', 
+        [booking_id],
+        (err, results) => {
           if (err) {
-            return db.rollback(() => {
-              console.error('Error deleting booking:', err);
-              res.status(500).send('Server error: Error deleting booking');
-            });
+            console.error('Error fetching payment details:', err);
+            return res.status(500).json({ error: 'Error fetching payment details' });
+          }
+          if (results.length === 0) {
+            return res.status(404).json({ error: 'Payment not found for this booking' });
           }
 
-          // Commit transaction
-          db.commit((err) => {
-            if (err) {
-              return db.rollback(() => {
-                console.error('Error committing transaction:', err);
-                res.status(500).send('Server error: Error committing transaction');
-              });
+          const paymentId = results[0].payment_id;
+
+          db.query(
+            'UPDATE payments SET amount = ?, payment_date = ?, status = ?, payment_method = ? WHERE payment_id = ?', 
+            [amount, payment_date, 'Đã thanh toán', payment_method, paymentId], 
+            (err, result) => {
+              if (err) {
+                console.error('Error updating payment:', err);
+                return res.status(500).json({ error: 'Error updating payment' });
+              }
+
+              // Create invoice after successful payment update
+              const invoiceId = `HD${Math.random().toString().slice(2, 5)}`;
+              const issueDate = new Date().toISOString().split('T')[0];
+
+              db.query(
+                'INSERT INTO invoices (invoice_id, booking_id, payment_id, issue_date, total_amount) VALUES (?, ?, ?, ?, ?)', 
+                [invoiceId, booking_id, paymentId, issueDate, amount], 
+                (err, result) => {
+                  if (err) {
+                    console.error('Error creating invoice:', err);
+                    return res.status(500).json({ error: 'Error creating invoice' });
+                  }
+
+                  res.status(200).json({ status: 'Đã thanh toán', message: 'Payment and invoice created successfully' });
+                }
+              );
             }
-
-            res.status(200).send('Payment canceled and booking deleted');
-          });
-        });
-      });
-    });
-  });
+          );
+        }
+      );
+    }
+  );
 });
+app.put('/payments/cancel', authenticateJWT, (req, res) => {
+  const { booking_id } = req.body;
 
+  db.query(
+    'SELECT payment_id FROM payments WHERE booking_id = ?', 
+    [booking_id],
+    (err, results) => {
+      if (err) {
+        console.error('Error fetching payment details:', err);
+        return res.status(500).json({ error: 'Error fetching payment details' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'Payment not found for this booking' });
+      }
+
+      const paymentId = results[0].payment_id;
+
+      db.query(
+        'UPDATE payments SET status = ? WHERE payment_id = ?', 
+        ['Đã hủy', paymentId], 
+        (err, result) => {
+          if (err) {
+            console.error('Error updating payment status to Hủy:', err);
+            return res.status(500).json({ error: 'Error updating payment status' });
+          }
+          res.status(200).json({ status: 'Hủy', message: 'Payment canceled successfully' });
+        }
+      );
+    }
+  );
+});
+// Fetch invoices endpoint
+app.get('/invoices', authenticateJWT, (req, res) => {
+  db.query(
+    `SELECT i.invoice_id, i.booking_id, i.payment_id, i.issue_date, i.total_amount
+     FROM invoices i
+     JOIN payments p ON i.payment_id = p.payment_id
+     WHERE p.status = 'Đã thanh toán'`,
+    (err, results) => {
+      if (err) {
+        console.error('Error fetching invoices:', err);
+        return res.status(500).send('Error fetching invoices');
+      }
+      res.status(200).json({ invoices: results });
+    }
+  );
+});
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

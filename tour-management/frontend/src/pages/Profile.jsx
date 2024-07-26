@@ -30,10 +30,11 @@ const Profile = () => {
                         setProfileData({
                             name: userData.name || '',
                             gender: userData.gender || '',
-                            birth_date: userData.birth_date ? new Date(userData.birth_date).toISOString().split('T')[0] : '',
+                            birth_date: userData.birth_date ? addOneDay(userData.birth_date): '',
                             role: userData.role || '',
                             phone_number: userData.phone_number || ''
                         });
+                        
                     } else {
                         console.error('Failed to fetch user profile');
                     }
@@ -47,7 +48,11 @@ const Profile = () => {
             console.warn('User or token is not in localStorage');
         }
     }, []);
-
+    const addOneDay = (dateString) => {
+        const date = new Date(dateString);
+        date.setDate(date.getDate() + 1);
+        return date.toISOString().split('T')[0];
+    };
     const handleChange = (e) => {
         const { name, value } = e.target;
         setProfileData({

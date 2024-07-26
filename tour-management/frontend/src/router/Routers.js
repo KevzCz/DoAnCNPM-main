@@ -15,6 +15,8 @@ import AdminPage from "../admin_pages/AdminPage";
 import AddLocation from "../admin_pages/AddLocation";
 import BookingDetails from "../pages/BookingDetails";
 import Payment from "../pages/Payment";
+import Invoices from "../pages/Invoices";
+
 
 const Routers = () => {
   return (
@@ -35,6 +37,7 @@ const Routers = () => {
         <Route path="/add-location" element={<AddLocation />} />
         <Route path="/booking-details" element={<BookingDetails />} />
         <Route path="/payment/:bookingId" element={<Payment />} />
+        <Route path="/invoices"element={<Invoices />} />
     </Routes>
   );
 };

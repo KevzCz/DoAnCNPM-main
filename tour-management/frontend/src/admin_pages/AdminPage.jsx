@@ -8,7 +8,6 @@ const AdminPage = () => {
             <h1>Admin Dashboard</h1>
             <div className="admin-links">
                 <Link to="/add-tour" className="admin-link">Add Tour</Link>
-                <Link to="/add-category" className="admin-link">Add Category</Link>
                 <Link to="/add-schedule" className="admin-link">Add Schedule</Link>
                 <Link to="/add-location" className="admin-link">Add Location</Link>
             </div>

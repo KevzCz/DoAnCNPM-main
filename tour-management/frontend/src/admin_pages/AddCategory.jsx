@@ -41,7 +41,7 @@ const AddCategory = () => {
     try {
       await axios.post('http://localhost:3000/categories', { name });
       alert('Category created successfully');
-      navigate('/admin');
+      navigate('/tours');
     } catch (error) {
       console.error('Error creating category:', error);
     }
@@ -52,7 +52,7 @@ const AddCategory = () => {
     try {
       await axios.post('http://localhost:3000/tour-categories', { tour_id: selectedTour, category_id: selectedCategory });
       alert('Tour added to category successfully');
-      navigate('/admin');
+      navigate('/tours');
     } catch (error) {
       console.error('Error adding tour to category:', error);
     }
@@ -78,7 +78,7 @@ const AddCategory = () => {
           required 
         />
         <button type="submit">Add Category</button>
-        <button type="button" onClick={() => navigate('/admin')}>Back to Admin Panel</button>
+        <button type="button" onClick={() => navigate('/tours')}>Back to Admin Panel</button>
       </form>
       
       <h1>Add Tour to Category</h1>

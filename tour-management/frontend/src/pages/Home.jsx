@@ -4,15 +4,16 @@ import { Container, Row, Col } from "reactstrap";
 import heroImg from "../assets/images/hero-img01.jpg";
 import heroImg2 from "../assets/images/hero-img02.jpg";
 import heroVid from "../assets/images/hero-video.mp4";
-import worldImg from "..//assets/images/world.png";
+import worldImg from "../assets/images/world.png";
 import Subtitle from "../shared/Subtitle";
 import SearchBar from "../shared/SearchBar";
 import ServiceList from "../services/ServiceList";
-import FeaturedTourList from "../components/Featured-tours/FeaturedTourList";
+import Tour from "../pages/Tour"
 import experienceImg from "../assets/images/experience.png";
 import MasonryImagesGallery from "../components/Image-gallery/MasonryImagesGallery";
 import Testimonial from "../components/Testimonial/Testimonial";
 import Newletters from "../shared/Newletters";
+
 const Home = () => {
   return (
     <>
@@ -60,12 +61,13 @@ const Home = () => {
                 <img src={heroImg2} alt="" />
               </div>
             </Col>
-
             <SearchBar />
           </Row>
         </Container>
       </section>
-      {/*hero section start*/}
+      {/*hero section end*/}
+      
+      {/* service section start */}
       <section>
         <Container>
           <Row>
@@ -77,6 +79,8 @@ const Home = () => {
           </Row>
         </Container>
       </section>
+      {/* service section end */}
+      
       {/* feature tour section start */}
       <section>
         <Container>
@@ -85,11 +89,12 @@ const Home = () => {
               <Subtitle subtitle={"Explore"} />
               <h2 className="feature__tour-title">Our featured tours</h2>
             </Col>
-            <FeaturedTourList />
+            <Tour />
           </Row>
         </Container>
       </section>
       {/* feature tour section end */}
+      
       {/* experience section start */}
       <section>
         <Container>
@@ -98,7 +103,7 @@ const Home = () => {
               <div className="experience__content">
                 <Subtitle subtitle={"Experience"} />
                 <h2>
-                  With our all experience <br /> we wil serve you
+                  With our all experience <br /> we will serve you
                 </h2>
                 <p>
                   Vịnh Hạ Long là một di sản thiên nhiên thế giới nằm ở tỉnh
@@ -150,6 +155,7 @@ const Home = () => {
         </Container>
       </section>
       {/* gallery section end */}
+      
       {/* testimonial section start */}
       <section>
         <Container>
@@ -165,6 +171,7 @@ const Home = () => {
         </Container>
       </section>
       {/* testimonial section end */}
+      
       <Newletters />
     </>
   );
