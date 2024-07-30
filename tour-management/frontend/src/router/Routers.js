@@ -23,6 +23,7 @@ import ActiveToursItinerary from "../pages/ActiveToursItinerary";  // Import Act
 import BookingCancelled from "../pages/BookingCancelled";
 import UpdateCategory from "../admin_pages/UpdateCategory";
 import UpdateLocation from "../admin_pages/UpdateLocation";
+import TourRevenue from "../admin_pages/TourRevenue";
 
 const Routers = () => {
   return (
@@ -51,6 +52,7 @@ const Routers = () => {
       <Route path="/booking-canceled" element={<BookingCancelled />} />
       <Route path="/update-location/:id" element={<UpdateLocation />} />
       <Route path="/update-category/:id" element={<UpdateCategory />} />
+      <Route path="/tour-revenue" element={<TourRevenue />} />
     </Routes>
   );
 };

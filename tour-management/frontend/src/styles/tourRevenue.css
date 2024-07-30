@@ -1,0 +1,71 @@
+.body-tour-revenue {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  color: #343a40;
+  margin: 0;
+  padding: 20px;
+}
+
+.h1-tour-revenue {
+  color: #007bff;
+  text-align: center;
+}
+
+.table-tour-revenue {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.table-tour-revenue, .th-tour-revenue, .td-tour-revenue {
+  border: 1px solid #ddd;
+}
+
+.th-tour-revenue, .td-tour-revenue {
+  padding: 12px;
+  text-align: left;
+}
+
+.th-tour-revenue {
+  background-color: #007bff;
+  color: white;
+}
+
+.tr-tour-revenue:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.container-tour-revenue {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.date-filter-tour-revenue {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.date-filter-tour-revenue input {
+  margin: 0 10px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.date-filter-tour-revenue button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.date-filter-tour-revenue button:hover {
+  background-color: #0056b3;
+}

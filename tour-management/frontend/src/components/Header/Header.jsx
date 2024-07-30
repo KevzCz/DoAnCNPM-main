@@ -40,6 +40,10 @@ const NVQLCTLinks = [
     path: "/add-location",
     display: "Add Location",
   },
+  {
+    path: "/tour-revenue",
+    display: "Tour Revenue"
+  }
 ];
 
 const AdminLinks = [
@@ -47,6 +51,10 @@ const AdminLinks = [
     path: "/add-category",
     display: "Add Category",
   },
+  {
+    path: "/tour-revenue",
+    display: "Tour Revenue"
+  }
 ];
 
 const Header = () => {

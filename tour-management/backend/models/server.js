@@ -142,7 +142,34 @@ app.post('/tours', (req, res) => {
     res.status(201).json({ tour_id, message: 'Tour created' });
   });
 });
+// Add this new endpoint
+app.get('/api/tour-revenues', (req, res) => {
+  const { start_date, end_date } = req.query;
+  let query = `
+    SELECT revenue_id, tour_id, total_revenue, total_bookings, revenue_date 
+    FROM tour_revenue
+    WHERE 1=1
+  `;
+  const queryParams = [];
 
+  if (start_date) {
+    query += ' AND revenue_date >= ?';
+    queryParams.push(start_date);
+  }
+
+  if (end_date) {
+    query += ' AND revenue_date <= ?';
+    queryParams.push(end_date);
+  }
+
+  db.query(query, queryParams, (err, results) => {
+    if (err) {
+      console.error('Error fetching tour revenues:', err);
+      return res.status(500).send('Error fetching tour revenues');
+    }
+    res.status(200).json(results);
+  });
+});
 app.get('/tours', (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 8;
@@ -235,7 +262,98 @@ app.get('/tours', (req, res) => {
 });
 
 
+// Add refund endpoint
+app.post('/invoices/refund/:invoiceId', authenticateJWT, (req, res) => {
+  const { invoiceId } = req.params;
 
+  // Fetch the invoice details
+  db.query(
+    'SELECT i.issue_date, i.total_amount, p.payment_id, b.tour_id, i.booking_id FROM invoices i JOIN payments p ON i.payment_id = p.payment_id JOIN bookings b ON i.booking_id = b.booking_id WHERE i.invoice_id = ?',
+    [invoiceId],
+    (err, results) => {
+      if (err) {
+        console.error('Error fetching invoice details:', err);
+        return res.status(500).send('Error fetching invoice details');
+      }
+
+      if (results.length === 0) {
+        return res.status(404).send('Invoice not found');
+      }
+
+      const invoice = results[0];
+      const currentDate = new Date();
+      const issueDate = new Date(invoice.issue_date);
+      const diffDays = Math.ceil((currentDate - issueDate) / (1000 * 60 * 60 * 24));
+
+      // Check if the refund is within the allowable time frame (e.g., 2 days)
+      if (diffDays > 2) {
+        return res.status(400).send('Refund not allowed after 2 days');
+      }
+
+      // Start transaction
+      db.beginTransaction((err) => {
+        if (err) {
+          console.error('Error starting transaction:', err);
+          return res.status(500).send('Error starting transaction');
+        }
+
+        // Update payment status to "canceled"
+        db.query(
+          'UPDATE payments SET status = ? WHERE payment_id = ?',
+          ['Đã hủy', invoice.payment_id],
+          (err, result) => {
+            if (err) {
+              return db.rollback(() => {
+                console.error('Error updating payment status:', err);
+                res.status(500).send('Error updating payment status');
+              });
+            }
+
+            // Update invoice total amount to 0
+            db.query(
+              'UPDATE invoices SET total_amount = ? WHERE invoice_id = ?',
+              [0, invoiceId],
+              (err, result) => {
+                if (err) {
+                  return db.rollback(() => {
+                    console.error('Error updating invoice amount:', err);
+                    res.status(500).send('Error updating invoice amount');
+                  });
+                }
+
+                // Update tour revenue
+                db.query(
+                  'UPDATE tour_revenue SET total_revenue = total_revenue - ?, total_bookings = total_bookings - 1 WHERE tour_id = ? AND revenue_date = ?',
+                  [invoice.total_amount, invoice.tour_id, invoice.issue_date],
+                  (err, result) => {
+                    if (err) {
+                      return db.rollback(() => {
+                        console.error('Error updating tour revenue:', err);
+                        res.status(500).send('Error updating tour revenue');
+                      });
+                    }
+
+                    // Commit transaction
+                    db.commit((err) => {
+                      if (err) {
+                        return db.rollback(() => {
+                          console.error('Error committing transaction:', err);
+                          res.status(500).send('Error committing transaction');
+                        });
+                      }
+
+                      res.status(200).send('Refund processed successfully');
+                    });
+                  }
+                );
+              }
+            );
+          }
+        );
+      });
+    }
+  );
+});
 
 
 // Fetch tour by ID endpoint
