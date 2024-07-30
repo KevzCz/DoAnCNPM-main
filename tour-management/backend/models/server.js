@@ -143,12 +143,11 @@ app.post('/tours', (req, res) => {
   });
 });
 
-// Fetch tours endpoint
 app.get('/tours', (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 8;
   const offset = (page - 1) * limit;
-  const status = req.query.status;
+  const { status, location, price, maxGroupSize } = req.query;
   const hasItinerary = req.query.hasItinerary === 'true';
 
   let query = `SELECT t.tour_id, t.name, t.image_url, t.price, t.max_seats, t.seats_remaining, t.status, 
@@ -157,26 +156,42 @@ app.get('/tours', (req, res) => {
                l.name AS location
                FROM tours t
                LEFT JOIN tour_locations tl ON t.tour_id = tl.tour_id
-               LEFT JOIN locations l ON tl.location_id = l.location_id `;
-  let countQuery = 'SELECT COUNT(*) AS total FROM tours t';
+               LEFT JOIN locations l ON tl.location_id = l.location_id
+               WHERE 1=1 `;
+  
+  let countQuery = `SELECT COUNT(*) AS total 
+                    FROM tours t
+                    LEFT JOIN tour_locations tl ON t.tour_id = tl.tour_id
+                    LEFT JOIN locations l ON tl.location_id = l.location_id
+                    WHERE 1=1 `;
+
   let whereClause = '';
 
-  if (status === 'active') {
-    whereClause = "WHERE t.status IN ('Hoạt động', 'Hết chỗ') ";
-  } else if (status === 'inactive') {
-    whereClause = "WHERE t.status IN ('Kết thúc', 'Không hoạt động') ";
-  }
-
-  if (hasItinerary) {
-    if (whereClause) {
-      whereClause += "AND EXISTS (SELECT 1 FROM tour_itinerary ti WHERE ti.tour_id = t.tour_id) ";
-    } else {
-      whereClause = "WHERE EXISTS (SELECT 1 FROM tour_itinerary ti WHERE ti.tour_id = t.tour_id) ";
+  if (status) {
+    if (status === 'active') {
+      whereClause += "AND t.status IN ('Hoạt động', 'Hết chỗ') ";
+    } else if (status === 'inactive') {
+      whereClause += "AND t.status IN ('Kết thúc', 'Không hoạt động') ";
     }
   }
 
+  if (hasItinerary) {
+    whereClause += "AND EXISTS (SELECT 1 FROM tour_itinerary ti WHERE ti.tour_id = t.tour_id) ";
+  }
+  if (location) {
+    whereClause += `AND l.name LIKE '%${location}%' `;
+  }
+
+  if (price) {
+    whereClause += `AND t.price <= ${price} `;
+  }
+
+  if (maxGroupSize) {
+    whereClause += `AND t.max_seats >= ${maxGroupSize} `;
+  }
+
   query += whereClause + 'ORDER BY t.name LIMIT ? OFFSET ?';
-  countQuery += ' ' + whereClause;
+  countQuery += whereClause;
 
   db.query(query, [limit, offset], (err, results) => {
     if (err) {
@@ -184,7 +199,6 @@ app.get('/tours', (req, res) => {
       return res.status(500).send('Error fetching tours');
     }
 
-    // Fetch itineraries for the tours
     const tourIds = results.map(tour => tour.tour_id);
     if (tourIds.length > 0) {
       db.query(`SELECT * FROM tour_itinerary WHERE tour_id IN (?)`, [tourIds], (err, itineraries) => {
@@ -193,7 +207,6 @@ app.get('/tours', (req, res) => {
           return res.status(500).send('Error fetching itineraries');
         }
 
-        // Map itineraries to their respective tours
         const toursWithItineraries = results.map(tour => {
           tour.itinerary = itineraries.filter(itinerary => itinerary.tour_id === tour.tour_id);
           return tour;

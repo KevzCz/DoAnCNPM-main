@@ -1,0 +1,147 @@
+/* Container Styles */
+.search-results-container {
+    padding: 2rem 1rem;
+    background-color: #f8f9fa;
+  }
+  
+  /* Row Styles */
+  .search-results-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+  
+  /* Column Styles */
+  .search-results-col {
+    margin-bottom: 2rem;
+  }
+  
+  /* No Results Message */
+  .no-results-message {
+    text-align: center;
+    color: #6c757d;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 2rem;
+  }
+  
+  /* Card Styles */
+  .card {
+    border: none !important;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .card:hover {
+    transform: translateY(-10px);
+  }
+  
+  .tour-img img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 5px 5px 0 0;
+  }
+  
+  .tour-img span {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--primary-color);
+    color: #fff;
+    padding: 0.3rem 0.5rem;
+    border-radius: 3px 0 0 0;
+    font-size: 0.9rem;
+    font-weight: bold;
+  }
+  
+  /* Card Body Styles */
+  .card-body {
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 0 0 5px 5px;
+  }
+  
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .tour-location {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+  }
+  
+  .tour-rating {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+  }
+  
+  /* Tour Title Styles */
+  .tour-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .tour-title a {
+    text-decoration: none;
+    color: var(--heading-color);
+    transition: color 0.3s;
+  }
+  
+  .tour-title a:hover {
+    color: var(--primary-color);
+  }
+  
+  /* Card Bottom Styles */
+  .card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  
+  .card-bottom h5 {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  
+  .card-bottom h5 span {
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 0.8rem;
+  }
+  
+  /* Button Styles */
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    transition: background-color 0.3s;
+  }
+  
+  .booking-btn {
+    background: var(--primary-color);
+    color: #fff;
+  }
+  
+  .booking-btn:hover {
+    background: var(--secondary-color);
+  }
+  
+  .booking-btn a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .booking-btn a:hover {
+    color: #fff;
+  }
+  

@@ -4,7 +4,7 @@ import Newletters from "../shared/Newletters";
 import SearchBar from "../shared/SearchBar";
 import { Col, Container, Row, Card, CardBody } from "reactstrap";
 import { Link } from "react-router-dom";
-import "../styles/tour.css";
+import "../styles/tour.css"; // Import the shared CSS file
 
 const ActiveToursItinerary = () => {
   const [pageCount, setPageCount] = useState(0);
@@ -90,7 +90,6 @@ const ActiveToursItinerary = () => {
       </div>
     );
   };
-  
 
   return (
     <>
