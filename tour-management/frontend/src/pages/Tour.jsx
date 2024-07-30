@@ -11,6 +11,7 @@ const Tour = () => {
   const [page, setPage] = useState(0);
   const [tours, setTours] = useState([]);
   const [totalTours, setTotalTours] = useState(0);
+  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
     fetch(`http://localhost:3000/tours?page=${page + 1}&limit=8`)
@@ -23,9 +24,35 @@ const Tour = () => {
       });
   }, [page]);
 
+  useEffect(() => {
+    // Fetch user profile
+    const token = localStorage.getItem("token"); // Assume the JWT is stored in localStorage
+    if (token) {
+      fetch(`http://localhost:3000/user/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('User profile fetched:', data);
+          setUserProfile(data);
+        })
+        .catch(error => {
+          console.error('Error fetching user profile:', error);
+        });
+    } else {
+      console.log('No token found');
+    }
+  }, []);
+
   const TourCard = ({ tour }) => {
-    const { tour_id, name, image_url, price, max_seats, avg_rating, reviews = [] } = tour;
+    const { tour_id, name, image_url, price, max_seats, avg_rating, reviews = [], status } = tour;
     const defaultImage = "https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg";
+    const canEdit = status === 'Không hoạt động' || status === 'Đã kết thúc';
+
+    console.log(`Tour ${tour_id} - Status: ${status} - Can edit: ${canEdit}`);
+
     return (
       <div className="tour__card">
         <Card>
@@ -54,9 +81,16 @@ const Tour = () => {
               <h5>
                 $<Link to={`/tours/${tour_id}`}>{Math.floor(price)}</Link> <span> /per person</span>
               </h5>
-              <button className="btn booking__btn">
-                <Link to={`/tours/${tour_id}`}>Book Now</Link>
-              </button>
+              <div className="d-flex flex-column align-items-center">
+                {userProfile && userProfile.role === "NVQL_CT" && canEdit && (
+                  <button className="btn edit__btn mb-2">
+                    <Link to={`/tours/edit/${tour_id}`}>Edit</Link>
+                  </button>
+                )}
+                <button className="btn booking__btn">
+                  <Link to={`/tours/${tour_id}`}>Book Now</Link>
+                </button>
+              </div>
             </div>
           </CardBody>
         </Card>

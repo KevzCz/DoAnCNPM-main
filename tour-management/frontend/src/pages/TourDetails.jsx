@@ -7,7 +7,7 @@ import AuthContext from "../context/AuthContext";
 import "../styles/tour-details.css";
 
 const Booking = ({ tour, avgRating }) => {
-  const { price, reviews } = tour;
+  const { price, reviews, status } = tour;
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [fullname, setFullName] = useState("");
@@ -203,13 +203,19 @@ const Booking = ({ tour, avgRating }) => {
             <span> ${totalAmount}</span>
           </ListGroupItem>
         </ListGroup>
-        <Button className="btn primary__btn w-100 mt-4" type="submit" onClick={handleClick}>
+        <Button 
+          className="btn primary__btn w-100 mt-4" 
+          type="submit" 
+          onClick={handleClick} 
+          disabled={status === 'Hết chỗ'}
+        >
           Book Now
         </Button>
       </div>
     </div>
   );
 };
+
 
 const TourDetails = () => {
   const { id } = useParams();
@@ -319,6 +325,10 @@ const TourDetails = () => {
     end_date,
     max_seats,
     seats_remaining,
+    itinerary,
+    category,
+    location,
+    status // Add the status here
   } = tour;
 
   const { totalRating, avgRating } = calculateAvgRating(reviews);
@@ -332,7 +342,7 @@ const TourDetails = () => {
           <Row>
             <Col lg="8">
               <div className="tour__content">
-                <img src={defaultImage} alt="" />
+                <img src={image_url || defaultImage} alt="" />
                 <div className="tour__info">
                   <h2>{name}</h2>
                   <div className="d-flex align-items-center gap-5">
@@ -343,6 +353,9 @@ const TourDetails = () => {
                     </span>
                     <span>
                       <i className="ri-map-pin-user-fill"></i> {address}
+                    </span>
+                    <span>
+                      <i className="ri-information-line"></i> Status: {status} {/* Display the status */}
                     </span>
                   </div>
                   <div className="tour__extra-details">
@@ -358,9 +371,23 @@ const TourDetails = () => {
                     <span>
                       <i className="ri-group-line"></i> Remaining seats: {seats_remaining}
                     </span>
+                    <span>
+                      <i className="ri-map-pin-fill"></i> Location: {location}
+                    </span>
+                    <span>
+                      <i className="ri-price-tag-3-fill"></i> Category: {category}
+                    </span>
                   </div>
                   <h5>Description</h5>
                   <p>{description}</p>
+                  <h5>Itinerary</h5>
+                  <ul>
+                    {itinerary && itinerary.map((item, index) => (
+                      <li key={index}>
+                        <strong>Day {item.day_number}: </strong> {item.activity_description} (from {item.start_time} to {item.end_time})
+                      </li>
+                    ))}
+                  </ul>
                 </div>
                 <div className="tour__reviews mt-4">
                   <h4>Reviews({reviews.length} reviews)</h4>

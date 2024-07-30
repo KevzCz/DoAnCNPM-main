@@ -81,8 +81,8 @@ const AddSchedule = () => {
         <textarea placeholder="Activity Description" value={activityDescription} onChange={(e) => setActivityDescription(e.target.value)} required></textarea>
         <input type="time" placeholder="Start Time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
         <input type="time" placeholder="End Time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required />
-        <button type="submit">Add Schedule</button>
-        <button type="button" onClick={() => navigate('/admin')}>Back to Admin Panel</button>
+        <button type="submit" className="create-tour-button">Add Schedule</button>
+        <button type="button" className="create-tour-button" onClick={() => navigate('/admin')}>Back to Admin Panel</button>
       </form>
     </div>
   );

@@ -1,8 +1,52 @@
+/* thank-you.css */
+
+.thank__you {
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+}
+
 .thank__you span i {
   font-size: 4rem;
   color: green;
 }
+
 .thank__you h1 {
   font-size: 3.6rem;
   font-family: var(--subtitle-font-name);
+}
+
+.thank__you h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.thank__you .btn {
+  background-color: #ff9f43;
+  border: none;
+  color: #fff;
+}
+
+.thank__you .btn:hover {
+  background-color: #ffa726;
+}
+
+.primary__btn {
+  display: inline-block;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.primary__btn a {
+  color: #fff;
+  text-decoration: none;
 }

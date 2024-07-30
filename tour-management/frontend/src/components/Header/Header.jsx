@@ -25,10 +25,16 @@ const NVQLCTLinks = [
   {
     path: "/add-tour",
     display: "Add Tour",
-  },
-  {
-    path: "/add-schedule",
-    display: "Add Schedule",
+    submenu: [
+      {
+        path: "/tours/active",
+        display: "Active Tours",
+      },
+      {
+        path: "/tours/unactive",
+        display: "Unactive Tours",
+      },
+    ],
   },
   {
     path: "/add-location",
@@ -151,13 +157,24 @@ const Header = () => {
                     Tours
                   </span>
                   <div className="dropdown-menu">
-                    <Link to="/tours" className="dropdown-item">All Tours</Link>
+                    <Link to="/active-tours-itinerary" className="dropdown-item">All Tours</Link>
                     {user && user.role === 'NVQL_CT' && (
                       <>
                         {NVQLCTLinks.map((item, index) => (
-                          <Link to={item.path} className="dropdown-item" key={index}>
-                            {item.display}
-                          </Link>
+                          <div className="dropdown-item dropdown-parent" key={index}>
+                            <Link to={item.path}>
+                              {item.display}
+                            </Link>
+                            {item.submenu && (
+                              <div className="dropdown-submenu">
+                                {item.submenu.map((subItem, subIndex) => (
+                                  <Link to={subItem.path} className="dropdown-item" key={subIndex}>
+                                    {subItem.display}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         ))}
                       </>
                     )}

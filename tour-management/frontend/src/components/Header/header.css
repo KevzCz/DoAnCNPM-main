@@ -95,6 +95,23 @@
   display: block;
 }
 
+.dropdown-header .dropdown-submenu {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background-color: white;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  z-index: 1000;
+  min-width: 200px;
+}
+
+.dropdown-header:hover .dropdown-submenu {
+  display: block;
+}
+
 .dropdown-item {
   display: block;
   padding: 0.5rem 1rem;
@@ -121,6 +138,7 @@
   border-radius: 50px !important;
   padding: 0.4rem 1.5rem !important;
 }
+
 /* Additional CSS for the Tours dropdown */
 .dropdown-header .dropdown-toggle {
   cursor: pointer;
@@ -134,11 +152,11 @@
   color: var(--secondary-color);
 }
 
-.dropdown-header .dropdown-menu {
+.dropdown-header .dropdown-submenu {
   display: none;
   position: absolute;
-  top: 100%;
-  left: 0;
+  top: 0;
+  left: 100%;
   background-color: white;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
   padding: 0.5rem;
@@ -147,7 +165,11 @@
   min-width: 200px;
 }
 
-.dropdown-header:hover .dropdown-menu {
+.dropdown-item.dropdown-parent {
+  position: relative;
+}
+
+.dropdown-item.dropdown-parent:hover .dropdown-submenu {
   display: block;
 }
 

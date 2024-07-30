@@ -1,0 +1,93 @@
+/* Styles for location and category lists */
+.location-list-one, .category-list-one {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .location-items-one, .category-items-one {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .location-items-one li, .category-items-one li {
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-bottom: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .location-items-one li:hover, .category-items-one li:hover {
+    background-color: #f0f0f0;
+  }
+  
+  /* Styles for admin forms and containers */
+  .admin-container-one {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    text-align: center;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .admin-container-one h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-weight: 700;
+  }
+  
+  .admin-form-one {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .admin-form-one input,
+  .admin-form-one textarea,
+  .admin-form-one button {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+  
+  .admin-form-one input:focus,
+  .admin-form-one textarea:focus {
+    border-color: #007BFF;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+  }
+  
+  .admin-form-one textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .create-tour-button-one,
+  .admin-form-one button {
+    background-color: #007BFF;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .create-tour-button-one:hover,
+  .admin-form-one button:hover {
+    background-color: #0056b3;
+  }
+  
+  .create-tour-button-one:active,
+  .admin-form-one button:active {
+    background-color: #004494;
+  }
+  

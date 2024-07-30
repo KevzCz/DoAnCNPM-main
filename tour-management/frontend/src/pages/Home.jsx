@@ -8,7 +8,7 @@ import worldImg from "../assets/images/world.png";
 import Subtitle from "../shared/Subtitle";
 import SearchBar from "../shared/SearchBar";
 import ServiceList from "../services/ServiceList";
-import Tour from "../pages/Tour"
+import ActiveToursItinerary from "./ActiveToursItinerary";
 import experienceImg from "../assets/images/experience.png";
 import MasonryImagesGallery from "../components/Image-gallery/MasonryImagesGallery";
 import Testimonial from "../components/Testimonial/Testimonial";
@@ -89,7 +89,7 @@ const Home = () => {
               <Subtitle subtitle={"Explore"} />
               <h2 className="feature__tour-title">Our featured tours</h2>
             </Col>
-            <Tour />
+            <ActiveToursItinerary />
           </Row>
         </Container>
       </section>
